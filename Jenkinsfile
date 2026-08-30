@@ -41,19 +41,18 @@ pipeline {
         stage("Push the changed deployment file to Git") {
             steps {
                 sh """
-                   # Configured with your details for precise Git authorship metadata tracking
                    git config --global user.name "Saikiran5604"
                    git config --global user.email "reddysaikiran257@gmail.com"
                    git add deployment.yaml
-                   
-                   # Added [skip ci] to prevent an infinite recursive automation build loop on push
                    git commit -m "Updated Deployment Manifest to tag ${env.IMAGE_TAG} [skip ci]"
                 """
+                // gitUsernamePassword automatically populates GIT_USERNAME and GIT_PASSWORD
                 withCredentials([gitUsernamePassword(credentialsId: 'github', gitToolName: 'Default')]) {
-                    // Swapped URL to safely push modifications directly into your own personal repository fork
-                    sh "git push https://github.com/Saikiran5604/gitops-register-app main"
+                    // Injecting the variables directly into the HTTPS URL layout guarantees successful authentication
+                    sh "git push https://${GIT_USERNAME}:${GIT_PASSWORD}@://github.com main"
                 }
             }
         }
+
     }
 }
