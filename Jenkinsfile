@@ -1,10 +1,17 @@
 pipeline {
     agent { label "jenkins-agent" }
 
+    parameters {
+        string(
+            name: 'IMAGE_TAG',
+            defaultValue: '',
+            description: 'Docker image tag received from CI'
+        )
+    }
+
     environment {
-        APP_NAME  = "register-app-pipeline"
-        IMAGE_TAG = "1.0.0-${BUILD_NUMBER}"
-        GIT_REPO  = "https://github.com/Saikiran5604/gitops-register-app.git"
+        APP_NAME = "register-app-pipeline"
+        GIT_REPO = "https://github.com/Saikiran5604/gitops-register-app.git"
     }
 
     stages {
@@ -20,6 +27,18 @@ pipeline {
                 git branch: 'main',
                     credentialsId: 'github',
                     url: "${GIT_REPO}"
+            }
+        }
+
+        stage("Validate Image Tag") {
+            steps {
+                script {
+                    if (!params.IMAGE_TAG?.trim()) {
+                        error "IMAGE_TAG was not provided by CI pipeline."
+                    }
+
+                    echo "Received IMAGE_TAG from CI: ${params.IMAGE_TAG}"
+                }
             }
         }
 
@@ -52,9 +71,9 @@ pipeline {
                     cat deployment.yaml
 
                     echo ""
-                    echo "Updating image tag to: ${IMAGE_TAG}"
+                    echo "Updating image tag to: ${params.IMAGE_TAG}"
 
-                    sed -i "s|register-app-pipeline:.*|register-app-pipeline:${IMAGE_TAG}|g" deployment.yaml
+                    sed -i "s|register-app-pipeline:.*|register-app-pipeline:${params.IMAGE_TAG}|g" deployment.yaml
 
                     echo ""
                     echo "========================================"
@@ -75,7 +94,7 @@ pipeline {
 
                     git add deployment.yaml
 
-                    git commit -m "Updated Deployment Manifest to tag ${IMAGE_TAG} [skip ci]" || true
+                    git commit -m "Updated Deployment Manifest to tag ${params.IMAGE_TAG} [skip ci]" || true
                 """
 
                 withCredentials([
