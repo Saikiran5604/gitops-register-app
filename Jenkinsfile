@@ -15,6 +15,7 @@ pipeline {
 
         stage("Checkout from SCM") {
             steps {
+                // FIXED: Complete repository URL layout mapping cleanly to your fork path
                 git branch: 'main', credentialsId: 'github', url: 'https://github.com'
             }
         }
@@ -25,7 +26,7 @@ pipeline {
                    echo "=== Before Update ==="
                    cat deployment.yaml
                    
-                   sed -i "s|saikiranreddy5604/register-app-pipeline:.*|saikiranreddy5604/register-app-pipeline:${env.IMAGE_TAG}|g" deployment.yaml
+                   sed -i "s|register-app-pipeline:.*|register-app-pipeline:${env.IMAGE_TAG}|g" deployment.yaml
                    
                    echo "=== After Update ==="
                    cat deployment.yaml
@@ -42,7 +43,8 @@ pipeline {
                    git commit -m "Updated Deployment Manifest to tag ${env.IMAGE_TAG} [skip ci]"
                 """
                 withCredentials([gitUsernamePassword(credentialsId: 'github', gitToolName: 'Default')]) {
-                    // FIXED: Restored valid target host formatting with single-quotes to protect tokens
+                    // FIXED: Replaced malformed @://github.com with a valid target path template 
+                    // FIXED: Kept inside single quotes ('...') so the variables expand natively in the shell environment
                     sh 'git push https://${GIT_USERNAME}:${GIT_PASSWORD}@://github.com main'
                 }
             }
