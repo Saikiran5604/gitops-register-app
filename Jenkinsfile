@@ -40,7 +40,6 @@ pipeline {
 
         stage("Push the changed deployment file to Git") {
             steps {
-                // Keep double quotes here since we need to interpolate the dynamic ${env.IMAGE_TAG} string
                 sh """
                    git config --global user.name "Saikiran5604"
                    git config --global user.email "reddysaikiran257@gmail.com"
@@ -49,11 +48,12 @@ pipeline {
                 """
                 
                 withCredentials([gitUsernamePassword(credentialsId: 'github', gitToolName: 'Default')]) {
-                    // CRUCIAL: Single quotes block Groovy interpolation and let the shell safely read the variables
+                    // This explicitly gives Git the correct path to your GitHub repository fork
                     sh 'git push https://${GIT_USERNAME}:${GIT_PASSWORD}@://github.com main'
                 }
             }
         }
+
 
 
     }
