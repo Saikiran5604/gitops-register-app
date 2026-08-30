@@ -51,7 +51,7 @@ pipeline {
                 """
                 withCredentials([gitUsernamePassword(credentialsId: 'github', gitToolName: 'Default')]) {
                     // Swapped URL to safely push modifications directly into your own personal repository fork
-                    sh "git push https://github.com main"
+                    sh "git push https://github.com/Saikiran5604/gitops-register-app main"
                 }
             }
         }
