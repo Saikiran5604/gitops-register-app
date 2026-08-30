@@ -40,19 +40,21 @@ pipeline {
 
         stage("Push the changed deployment file to Git") {
             steps {
+                // Keep double quotes here since we need to interpolate the dynamic ${env.IMAGE_TAG} string
                 sh """
                    git config --global user.name "Saikiran5604"
                    git config --global user.email "reddysaikiran257@gmail.com"
                    git add deployment.yaml
                    git commit -m "Updated Deployment Manifest to tag ${env.IMAGE_TAG} [skip ci]"
                 """
-                // gitUsernamePassword automatically populates GIT_USERNAME and GIT_PASSWORD
+                
                 withCredentials([gitUsernamePassword(credentialsId: 'github', gitToolName: 'Default')]) {
-                    // Injecting the variables directly into the HTTPS URL layout guarantees successful authentication
-                    sh "git push https://${GIT_USERNAME}:${GIT_PASSWORD}@://github.com main"
+                    // CRUCIAL: Single quotes block Groovy interpolation and let the shell safely read the variables
+                    sh 'git push https://${GIT_USERNAME}:${GIT_PASSWORD}@://github.com main'
                 }
             }
         }
+
 
     }
 }
