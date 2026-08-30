@@ -16,7 +16,7 @@ pipeline {
         stage("Checkout from SCM") {
             steps {
                 // FIXED: Complete repository URL layout mapping cleanly to your fork path
-                git branch: 'main', credentialsId: 'github', url: 'https://github.com'
+                git branch: 'main', credentialsId: 'github', url: 'https://github.com/Saikiran5604/gitops-register-app'
             }
         }
 
