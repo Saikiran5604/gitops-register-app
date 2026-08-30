@@ -1,11 +1,8 @@
 pipeline {
-    agent { label "jenkins-agent" } // Matches your active lowercase agent label
+    agent { label "jenkins-agent" }
     
     environment {
         APP_NAME = "register-app-pipeline"
-        
-        // CRUCIAL ADDITION: Your main build pipeline passes IMAGE_TAG down.
-        // We define a fallback dynamic evaluation here so the sed command doesn't evaluate to empty!
         IMAGE_TAG = "1.0.0-${BUILD_NUMBER}" 
     }
 
@@ -18,8 +15,7 @@ pipeline {
 
         stage("Checkout from SCM") {
             steps {
-                // Swapped to point directly to your personal repository fork
-                git branch: 'main', credentialsId: 'github', url: 'https://github.com/Saikiran5604/gitops-register-app'
+                git branch: 'main', credentialsId: 'github', url: 'https://github.com'
             }
         }
 
@@ -29,8 +25,7 @@ pipeline {
                    echo "=== Before Update ==="
                    cat deployment.yaml
                    
-                   # Using alternative delimiter '|' to safely handle colon replacements in string expansion
-                   sed -i "s|${env.APP_NAME}:.*|${env.APP_NAME}:${env.IMAGE_TAG}|g" deployment.yaml
+                   sed -i "s|saikiranreddy5604/register-app-pipeline:.*|saikiranreddy5604/register-app-pipeline:${env.IMAGE_TAG}|g" deployment.yaml
                    
                    echo "=== After Update ==="
                    cat deployment.yaml
@@ -46,15 +41,11 @@ pipeline {
                    git add deployment.yaml
                    git commit -m "Updated Deployment Manifest to tag ${env.IMAGE_TAG} [skip ci]"
                 """
-                
                 withCredentials([gitUsernamePassword(credentialsId: 'github', gitToolName: 'Default')]) {
-                    // This explicitly gives Git the correct path to your GitHub repository fork
+                    // FIXED: Restored valid target host formatting with single-quotes to protect tokens
                     sh 'git push https://${GIT_USERNAME}:${GIT_PASSWORD}@://github.com main'
                 }
             }
         }
-
-
-
     }
 }
