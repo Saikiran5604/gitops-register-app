@@ -19,7 +19,7 @@ pipeline {
         stage("Checkout from SCM") {
             steps {
                 // Swapped to point directly to your personal repository fork
-                git branch: 'main', credentialsId: 'github', url: 'https://github.com'
+                git branch: 'main', credentialsId: 'github', url: 'https://github.com/Saikiran5604/gitops-register-app'
             }
         }
 
