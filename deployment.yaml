@@ -2,6 +2,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: register-app-deployment
+  labels:
+    app: register-app
 spec:
   replicas: 2
   selector:
@@ -15,9 +17,25 @@ spec:
       containers:
         - name: register-app
           image: saikiranreddy5604/register-app-pipeline:1.0.0-43
-          resources:
-            limits:
-              memory: "256Mi"
-              cpu: "500m"
           ports:
             - containerPort: 8080
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 15
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "256Mi"
